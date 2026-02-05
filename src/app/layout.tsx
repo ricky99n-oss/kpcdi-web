@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+// Pastikan nama file di folder components adalah "Navbar.tsx" (N besar)
+import Navbar from "@/components/Navbar"; 
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Cek Website KPCDI",
-  description: "Website sedang diperbaiki",
+  title: "KPCDI - Komunitas Pasien Cuci Darah Indonesia",
+  description: "Wadah advokasi, edukasi, dan solidaritas bagi pasien ginjal.",
 };
 
 export default function RootLayout({
@@ -17,10 +19,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={inter.className}>
-        {/* Navbar dimatikan dulu */}
-        <div style={{ padding: '10px', background: 'yellow', color: 'black', textAlign: 'center' }}>
-            STATUS: LAYOUT BERHASIL DIMUAT
-        </div>
+        <Navbar />
         {children}
       </body>
     </html>
