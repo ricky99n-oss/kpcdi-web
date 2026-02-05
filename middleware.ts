@@ -54,18 +54,7 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Cek User
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // ATURAN KEAMANAN:
-  // Jika user mau masuk ke folder /admin...
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    // ...tapi user belum login (tidak ada data user)
-    if (!user) {
-      // TENDANG ke halaman login
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
-  }
+  await supabase.auth.getUser()
 
   return response
 }
@@ -77,7 +66,7 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
+     * Feel free to modify this pattern to include more paths.
      */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
