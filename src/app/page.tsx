@@ -1,43 +1,41 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { HeartPulse, Scale, Users, ArrowRight, Calendar, ArrowUpRight } from 'lucide-react';
+import { createClient } from '@/lib/supabaseClient'; // Import koneksi database
 
-// DATA BERITA TERBARU (Top 3)
-const latestNews = [
-  { 
-    id: 1, 
-    title: 'Darurat Hak Hidup: KPCDI Desak BPJS Pulihkan Status PBI', 
-    category: 'Advokasi', 
-    date: 'Februari 2026',
-    image: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80',
-    summary: 'Krisis kemanusiaan terjadi ketika puluhan pasien cuci darah ditolak layanan karena status PBI dinonaktifkan sepihak.' 
-  },
-  { 
-    id: 2, 
-    title: 'Mengawal Kedaulatan Obat: KPCDI Gugat UU Paten ke MK', 
-    category: 'Advokasi', 
-    date: 'Januari 2026',
-    image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&w=800&q=80',
-    summary: 'KPCDI melawan praktik monopoli obat ("evergreening") yang membuat harga obat transplan tetap mahal.'
-  },
-  { 
-    id: 3, 
-    title: 'Kenapa CAPD Belum Populer? Solusi Dialisis Mandiri', 
-    category: 'Edukasi', 
-    date: 'Maret 2025',
-    image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80',
-    summary: 'Meski lebih murah dan fleksibel, adopsi CAPD masih rendah. KPCDI mendorong insentif RS dan perbaikan logistik.'
+// Fungsi Khusus untuk mengambil data dari Supabase (Server Side)
+async function getLatestNews() {
+  const supabase = createClient();
+  
+  // Ambil 3 berita terbaru, diurutkan dari yang paling baru
+  const { data: posts, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('is_published', true) // Hanya yang status published
+    .order('created_at', { ascending: false })
+    .limit(3);
+
+  if (error) {
+    console.error('Error fetching news:', error);
+    return [];
   }
-];
 
-export default function Home() {
+  return posts;
+}
+
+// Tambahkan "async" di sini karena kita loading data
+export default async function Home() {
+  
+  // Panggil datanya
+  const latestNews = await getLatestNews();
+
   return (
     <main className="min-h-screen bg-white">
       
       {/* 1. HERO SECTION (Header Image) */}
       <section className="relative h-[750px] flex items-center justify-center text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
-           {/* Pastikan file header.png ada di folder public/images/ */}
+           {/* Header Image Statis */}
            <Image 
              src="/images/header.png" 
              alt="Header KPCDI" 
@@ -111,7 +109,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. SECTION BERITA TERBARU */}
+      {/* 3. SECTION BERITA TERBARU (DYNAMIC) */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
@@ -125,27 +123,38 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {latestNews.map((news) => (
+            {/* JIKA DATA KOSONG / ERROR */}
+            {latestNews.length === 0 && (
+                <div className="col-span-3 text-center py-10 bg-slate-50 rounded-xl">
+                    <p className="text-gray-500">Belum ada berita terbaru saat ini.</p>
+                </div>
+            )}
+
+            {/* MAPPING DATA DARI DATABASE */}
+            {latestNews.map((news: any) => (
               <article key={news.id} className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition duration-300 flex flex-col h-full">
                 <div className="h-56 overflow-hidden relative">
                    <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
+                   {/* Handle jika image_url kosong */}
                    <Image 
-                     src={news.image} 
+                     src={news.image_url || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80'} 
                      alt={news.title}
                      fill
                      className="object-cover group-hover:scale-110 transition duration-700"
                    />
                    <span className={`absolute top-4 left-4 text-xs font-bold px-3 py-1.5 rounded-full text-white z-10 ${news.category === 'Advokasi' ? 'bg-red-600' : 'bg-sky-600'}`}>
-                     {news.category}
+                     {news.category || 'Umum'}
                    </span>
                 </div>
                 <div className="p-6 flex flex-col flex-grow">
                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-3 font-semibold">
-                      <Calendar size={14} className="text-sky-500"/> {news.date}
+                      <Calendar size={14} className="text-sky-500"/> 
+                      {/* Format Tanggal Sederhana */}
+                      {new Date(news.created_at).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
                    </div>
                    <h3 className="text-xl font-bold text-gray-900 mb-3 leading-snug group-hover:text-sky-600 transition">
                      <Link href={`/news/${news.id}`}>
-                       <span className="absolute inset-0"></span> {/* Make entire card clickable */}
+                       <span className="absolute inset-0"></span> 
                        {news.title}
                      </Link>
                    </h3>
