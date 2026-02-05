@@ -1,14 +1,13 @@
-// FILE: src/app/layout.tsx
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+// import Navbar from "@/components/Navbar"; <--- KITA MATIKAN DULU INI
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "KPCDI - Komunitas Pasien Cuci Darah Indonesia",
-  description: "Wadah advokasi, edukasi, dan solidaritas bagi pasien ginjal di Indonesia.",
+  description: "Wadah advokasi, edukasi, dan solidaritas bagi pasien ginjal.",
 };
 
 export default function RootLayout({
@@ -19,10 +18,12 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={inter.className}>
-        <Navbar />
+        {/* <Navbar />  <--- KITA SEMBUNYIKAN DULU */}
+        <div style={{ padding: '20px', background: '#f0f9ff', color: 'black' }}>
+            <p><strong>Mode Debug:</strong> Navbar dinonaktifkan sementara.</p>
+        </div>
         {children}
       </body>
     </html>
   );
 }
-

@@ -1,13 +1,7 @@
 import type { NextConfig } from "next";
 
-// Perhatikan ": any" di sini. Ini kuncinya biar garis merah hilang.
-const nextConfig: any = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true, 
-  },
+const nextConfig: NextConfig = {
+  // Kita hapus bagian eslint/typescript ignore supaya errornya kelihatan
   images: {
     remotePatterns: [
       {
