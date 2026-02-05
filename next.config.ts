@@ -12,3 +12,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// Update pancingan untuk Vercel
