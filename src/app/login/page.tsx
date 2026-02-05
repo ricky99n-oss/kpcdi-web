@@ -1,96 +1,90 @@
-"use client";
+'use client'; // <--- WAJIB ADA di baris paling atas
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
-import { Lock, Mail, Loader2 } from 'lucide-react';
-import Image from 'next/image';
+import { createClient } from '@/lib/supabaseClient';
+import Link from 'next/link';
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  
+  // Inisialisasi Supabase Client
+  const supabase = createClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError('Login gagal! Periksa email atau password.');
+      if (error) {
+        alert('Login Gagal: ' + error.message);
+      } else {
+        // Login Sukses -> Arahkan ke Dashboard
+        // Set cookie manual agar middleware membaca session (opsional, tapi membantu)
+        document.cookie = "sb-access-token=true; path=/"; 
+        router.push('/admin/dashboard');
+        router.refresh();
+      }
+    } catch (err) {
+      console.error('Login Error:', err);
+      alert('Terjadi kesalahan sistem.');
+    } finally {
       setLoading(false);
-    } else {
-      // Login sukses, arahkan ke dashboard
-      router.refresh();
-      router.push('/admin/dashboard');
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
+      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+        <h1 className="text-2xl font-bold text-center mb-6 text-sky-900">Login Admin KPCDI</h1>
         
-        <div className="text-center mb-8">
-            <div className="relative w-20 h-20 mx-auto mb-4">
-                 <Image src="/images/logo.png" alt="Logo" fill className="object-contain"/>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">Admin Portal KPCDI</h1>
-            <p className="text-gray-500 text-sm mt-1">Silakan login untuk mengelola konten.</p>
-        </div>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input 
+              type="email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
+              placeholder="admin@kpcdi.org"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input 
+              type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"
+              placeholder="••••••••"
+              required
+            />
+          </div>
 
-        {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-6 text-center font-medium border border-red-100">
-                {error}
-            </div>
-        )}
-
-        <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Email</label>
-                <div className="relative">
-                    <Mail className="absolute left-3 top-3 text-gray-400" size={20}/>
-                    <input 
-                        type="email" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-sky-500 outline-none"
-                        placeholder="admin@kpcdi.org"
-                        required
-                    />
-                </div>
-            </div>
-
-            <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
-                <div className="relative">
-                    <Lock className="absolute left-3 top-3 text-gray-400" size={20}/>
-                    <input 
-                        type="password" 
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-sky-500 outline-none"
-                        placeholder="••••••••"
-                        required
-                    />
-                </div>
-            </div>
-
-            <button 
-                type="submit" 
-                disabled={loading}
-                className="w-full bg-sky-900 text-white font-bold py-3.5 rounded-xl hover:bg-sky-800 transition shadow-lg flex justify-center items-center gap-2"
-            >
-                {loading ? <Loader2 className="animate-spin" /> : 'Masuk Dashboard'}
-            </button>
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full bg-sky-600 text-white py-2 rounded-lg font-bold hover:bg-sky-700 transition disabled:opacity-50"
+          >
+            {loading ? 'Memproses...' : 'Masuk'}
+          </button>
         </form>
 
+        <div className="mt-6 text-center text-sm">
+            <Link href="/" className="text-gray-500 hover:text-sky-600">
+                ← Kembali ke Beranda
+            </Link>
+        </div>
       </div>
     </div>
   );
