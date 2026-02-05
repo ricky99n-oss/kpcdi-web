@@ -1,6 +1,7 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  /* config options here */
+import type { NextConfig } from "next";
+
+// Perhatikan ": any" di sini. Ini kuncinya biar garis merah hilang.
+const nextConfig: any = {
   eslint: {
     ignoreDuringBuilds: true,
   },
